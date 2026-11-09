@@ -51,4 +51,5 @@ jobs:
               installables+=(".#${kind}.${SYSTEM}.\"${name}\"^*")
             done < <(jq -r '.[]' <<< "$names")
           done
+          echo "INSTALLABLES: ${installables[@]}"
           nix build --no-link --print-build-logs --keep-going "${installables[@]}"
