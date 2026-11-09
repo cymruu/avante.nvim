@@ -32,12 +32,6 @@ jobs:
 
       - uses: $/.github/actions/install-nix
 
-      - name: Configure Cachix
-        uses: cachix/cachix-action@v17
-        with:
-          name: avante-nvim
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-
       - name: Build all flake outputs
         shell: bash
         env:
