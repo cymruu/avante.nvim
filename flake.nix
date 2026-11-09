@@ -121,7 +121,7 @@
             cargoHash = "sha256-WP1alq1h7Tp8OUm/EHX4JHEULZ9CP1WPsSuUgQZmz4Y=";
             cargoBuildFlags = [ "--package" pname ];
             nativeBuildInputs = [ pkgs.pkg-config pkgs.perl ];
-            buildInputs = [ pkgs.openssl ];
+            buildInputs = [ pkgs.openssl pkgs.aws-lc pkgs.zstd pkgs.oniguruma ];
             OPENSSL_NO_VENDOR = 1;
 
             # The workspace tests fetch web pages and tokenizer models, which
@@ -146,28 +146,6 @@
                 package = pythonSet.rag-service;
             };
 
-          # TODO replace with nixpkgs' packaged libraries
-          megaLogging = pkgs.vimUtils.buildVimPlugin {
-            pname = "mega.logging";
-            version = "194ad8c";
-            src = pkgs.fetchFromGitHub {
-              owner = "ColinKennedy";
-              repo = "mega.logging";
-              rev = "194ad8c300186e73c3eb1ebeb3ede42eb219be3b";
-              hash = "sha256-hV7uJyu0XszGLOvcRcDNDE9P6d8GTxBX+la1lQVxx2s=";
-            };
-          };
-          megaCmdparse = pkgs.vimUtils.buildVimPlugin {
-            pname = "mega.cmdparse";
-            version = "47ea5b1";
-            src = pkgs.fetchFromGitHub {
-              owner = "ColinKennedy";
-              repo = "mega.cmdparse";
-              rev = "47ea5b1b23059fbb79a8e262002f32e7cd8aed90";
-              hash = "sha256-RgRsHt1O6UQ/90JeAkHvdpgfjF+I25zg/oGV0cK7t6U=";
-            };
-            dependencies = [ megaLogging ];
-          };
           avantePlugin = pkgs.vimPlugins.avante-nvim.overrideAttrs (final: old: {
             version = self.rev or self.dirtyRev or "unknown";
             name = "vimplugin-${final.pname}-${final.version}";
@@ -175,7 +153,8 @@
               root = ./.;
               fileset = lib.fileset.unions [ ./lua ./plugin ./doc ./autoload ./ftplugin ./contrib];
             };
-            dependencies = old.dependencies ++ [ megaCmdparse ];
+            dependencies = old.dependencies ++ [ pkgs.luaPackages.mega-cmdparse ];
+
             # Native modules are built separately by the Rust packages above.
             # this overrides the nixpkgs postInstall step. Ideally we should be able to reuse nixpkgs code by
             # just overriding the avante-nvim-lib
